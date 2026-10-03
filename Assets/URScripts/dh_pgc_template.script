@@ -1,0 +1,591 @@
+
+def external_arm_pgc_test():
+
+  # begin: URCap Installation Node
+  #   Source: DH-PGC, 2.4.13, DH-Robotics
+  #   Type: DH-PGC
+  #################################################
+  # Head - Connect server
+  #################################################
+  global dh_pgc_global_lock = False
+  global dh_pgc_connected_to_server = "False"
+  dh_pgc_operate = False
+  if ("False" == dh_pgc_connected_to_server):
+    dh_pgc_operate = socket_open("127.0.0.1", 9002, "dh_pgc_")
+    if (True ==dh_pgc_operate):
+      dh_pgc_connected_to_server = "True"
+    end
+  end
+  def dh_pgc_is_connected_to_server():
+    return dh_pgc_connected_to_server
+  end
+  def dh_pgc_lock():
+    enter_critical
+    while (True):
+      if (dh_pgc_global_lock == False):
+        dh_pgc_global_lock = True
+        break
+      end
+      sleep(0.1)
+    end
+    exit_critical
+  end
+  def dh_pgc_unlock():
+    enter_critical
+    while (True):
+      if (dh_pgc_global_lock == True):
+        dh_pgc_global_lock = False
+        break
+      end
+      sleep(0.1)
+    end
+    exit_critical
+  end
+  
+  
+  def dh_pgc_scan():
+    local ret = False
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String scan()", "dh_pgc_")
+    while (False == operate):
+      popup("523:exportScanFunction","socket_send_line", blocking = True)
+    end
+    local response = "False"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    ret = "True"== response
+    return ret
+  end
+  
+  
+  def dh_pgc_get_scan_status():
+    local ret = False
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getScanStatus()", "dh_pgc_")
+    while (False == operate):
+      popup("581:exportGetScanStatusFunction","socket_send_line", blocking = True)
+    end
+    local response = "False"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    ret = "True"== response
+    return ret
+  end
+  
+  
+  def dh_pgc_is_scanned():
+    local response = False
+    response = dh_pgc_get_scan_status()
+    local ret = False
+    if (True == response):
+      ret = True
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_get_communication_device(connect_mode):
+    local ret = False
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getCommunicationDevice(String connectMode)", "dh_pgc_")
+    operate = operate and socket_send_line(connect_mode, "dh_pgc_")
+    while (False == operate):
+      popup("621:exportGetCommunicationDeviceFunction","socket_send_line", blocking = True)
+    end
+    local response = "False"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    ret = "True"== response
+    return ret
+  end
+  
+  
+  def dh_pgc_relate_device(installation_index, connect_mode, device_id):
+    local ret = False
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String relateDevice(int installationIndex, String connectMode, int deviceId)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+    operate = operate and socket_send_line(connect_mode, "dh_pgc_")
+    operate = operate and socket_send_line(device_id, "dh_pgc_")
+    while (False == operate):
+      popup("665:exportRelateFunction","socket_send_line", blocking = True)
+    end
+    local response = "False"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    ret = "True"== response
+    return ret
+  end
+  
+  
+  def dh_pgc_connect(installation_index):
+    local ret = False
+    while (True):
+      local operate = True
+      dh_pgc_lock()
+      operate = operate and socket_send_line("String connect(int installationIndex)", "dh_pgc_")
+      operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      while (False == operate):
+        popup("747:exportConnectFunction","socket_send_line", blocking = True)
+      end
+      local response = "SUCCEEDED"
+      response = socket_read_line("dh_pgc_")
+      dh_pgc_unlock()
+      ret = "SUCCEEDED"== response
+      if (True == ret):
+        break
+      end
+      if ("PARAMETERS_FAILED" == response):
+        while (True):
+          popup("Please check installation configuration","Tip", blocking = True)
+        end
+      end
+      break
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_disconnect(installation_index):
+    local ret = False
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String disconnect(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+    while (False == operate):
+      popup("798:exportDisconnectFunction","socket_send_line", blocking = True)
+    end
+    local response = "False"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    ret = "True"== response
+    return ret
+  end
+  
+  
+  def dh_pgc_get_communication_status(installation_index):
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getCommunicationStatus(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+    while (False == operate):
+      popup("705:exportGetCommunicationStatusFunction","socket_send_line", blocking = True)
+    end
+    local response = "UNDEFINE"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    return response
+  end
+  
+  
+  def dh_pgc_is_connected(installation_index):
+    local response = "UNDEFINE"
+    response = dh_pgc_get_communication_status(installation_index)
+    local ret = False
+    if ("CONNECTED" == response):
+      ret = True
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_is_occur_exception(installation_index):
+    local response = "UNDEFINE"
+    response = dh_pgc_get_communication_status(installation_index)
+    local ret = False
+    if ("WRITE_EXCEPTION" == response):
+      ret = True
+    end
+    if ("READ_EXCEPTION" == response):
+      ret = True
+    end
+    if ("SYNC_EXCEPTION" == response):
+      ret = True
+    end
+    if ("ALIVE_EXCEPTION" == response):
+      ret = True
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_get_gripper_status(installation_index):
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getGripperStatus(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+    while (False == operate):
+      popup("857:exportGetGripperStatusFunction","socket_send_line", blocking = True)
+    end
+    local response = "UNDEFINE"
+    response = socket_read_line("dh_pgc_")
+    dh_pgc_unlock()
+    return response
+  end
+  
+  
+  def dh_pgc_is_gripped(installation_index):
+    local response = "UNDEFINE"
+    response = dh_pgc_get_gripper_status(installation_index)
+    local ret = False
+    if ("DETECTED" == response):
+      ret = True
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_is_dropped(installation_index):
+    local response = "UNDEFINE"
+    response = dh_pgc_get_gripper_status(installation_index)
+    local ret = False
+    if ("DROPPED" == response):
+      ret = True
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_is_activated(installation_index):
+    local response = "UNDEFINE"
+    response = dh_pgc_get_gripper_status(installation_index)
+    local ret = True
+    if ("UNDEFINE" == response):
+      ret = False
+    end
+    if ("INACTIVATE" == response):
+      ret = False
+    end
+    if ("ACTIVATING" == response):
+      ret = False
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_set_activate(installation_index):
+    local ret = False
+    while (True):
+      if (dh_pgc_is_occur_exception(installation_index)):
+        break
+      end
+      local operate = True
+      dh_pgc_lock()
+      operate = operate and socket_send_line("String setActivate(int installationIndex)", "dh_pgc_")
+      operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      while (False == operate):
+        popup("987:exportSetActivateFunction","socket_send_line", blocking = True)
+      end
+      local response = "False"
+      response = socket_read_line("dh_pgc_")
+      dh_pgc_unlock()
+      ret = "True"== response
+      if (True == ret):
+        break
+      end
+      sleep(0.5)
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_set_activate_and_wait_complete(installation_index):
+    local ret = False
+    local operate = dh_pgc_set_activate(installation_index)
+    ret = operate and dh_pgc_wait_until_activated(installation_index)
+  return ret
+  end
+  
+  
+  def dh_pgc_set_position(installation_index, position):
+    local ret = False
+    while (True):
+      if (dh_pgc_is_occur_exception(installation_index)):
+        break
+      end
+      local operate = True
+      dh_pgc_lock()
+      operate = operate and socket_send_line("String setPosition(int installationIndex, float position)", "dh_pgc_")
+      operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      operate = operate and socket_send_line(position, "dh_pgc_")
+      while (False == operate):
+        popup("1122:exportSetPositionFunction","", blocking = True)
+      end
+      local response = "UNDEFINE"
+      response = socket_read_line("dh_pgc_")
+      dh_pgc_unlock()
+      ret = "True"== response
+      if (True == ret):
+        break
+      end
+      sleep(0.1)
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_set_position_and_wait_complete(installation_index, position):
+    local ret = False
+    local operate = dh_pgc_set_position(installation_index, position)
+    ret = operate and dh_pgc_wait_until_gripped_or_arrived(installation_index)
+  return ret
+  end
+  
+  
+  def dh_pgc_get_position(installation_index):
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getPosition(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      while (False == operate):
+        popup("1166:exportGetPositionFunction","socket_send_line", blocking = True)
+      end
+    local response = 0.0
+    local floats = socket_read_ascii_float(1, "dh_pgc_")
+    response = floats[1]
+    dh_pgc_unlock()
+    return response
+  end
+  
+  
+  def dh_pgc_set_force(installation_index, force):
+    local ret = False
+    while (True):
+      if (dh_pgc_is_occur_exception(installation_index)):
+        break
+      end
+      local operate = True
+      dh_pgc_lock()
+      operate = operate and socket_send_line("String setForce(int installationIndex, int force)", "dh_pgc_")
+      operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      operate = operate and socket_send_line(force, "dh_pgc_")
+      while (False == operate):
+        popup("1212:exportSetForceFunction","socket_send_line", blocking = True)
+      end
+      local response = "UNDEFINE"
+      response = socket_read_line("dh_pgc_")
+      dh_pgc_unlock()
+      ret = "True"== response
+      if (True == ret):
+        break
+      end
+      sleep(0.5)
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_get_force(installation_index):
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getForce(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+    while (False == operate):
+      popup("1256:exportGetForceFunction","socket_send_line", blocking = True)
+    end
+    local response = 0
+    local integers = socket_read_ascii_float(1, "dh_pgc_")
+    response = integers[1]
+    dh_pgc_unlock()
+    return response
+  end
+  
+  
+  def dh_pgc_set_speed(installation_index, speed):
+    local ret = False
+    while (True):
+      if (dh_pgc_is_occur_exception(installation_index)):
+        break
+      end
+      local operate = True
+      dh_pgc_lock()
+      operate = operate and socket_send_line("String setSpeed(int installationIndex, int speed)", "dh_pgc_")
+      operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      operate = operate and socket_send_line(speed, "dh_pgc_")
+      while (False == operate):
+        popup("1314:exportSetSpeedFunction","socket_send_line", blocking = True)
+      end
+      local response = "UNDEFINE"
+      response = socket_read_line("dh_pgc_")
+      dh_pgc_unlock()
+      ret = "True"== response
+      if (True == ret):
+        break
+      end
+      sleep(0.5)
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_get_speed(installation_index):
+    local operate = True
+    dh_pgc_lock()
+    operate = operate and socket_send_line("String getSpeed(int installationIndex)", "dh_pgc_")
+    operate = operate and socket_send_line(installation_index, "dh_pgc_")
+      while (False == operate):
+        popup("1370:exportGetSpeedFunction","socket_send_line", blocking = True)
+      end
+    local response = 0
+    local integers = socket_read_ascii_float(1, "dh_pgc_")
+    response = integers[1]
+    dh_pgc_unlock()
+    return response
+  end
+  
+  
+  def dh_pgc_wait_until_idle(installation_index):
+    local response = "UNDEFINE"
+    local ret = False
+    while (True):
+      response = dh_pgc_get_gripper_status(installation_index)
+      if ("" == response):
+        while (True):
+          popup("1917:exportWaitUntilIdle","Exception", blocking = True)
+        end
+      end
+      if ("UNDEFINE" == response):
+        while (True):
+          popup("1934:exportWaitUntilIdle","Exception", blocking = True)
+        end
+      end
+      if ("ACTIVATING" == response):
+        continue
+      end
+      if ("MOVING" == response):
+        continue
+      end
+      ret = True
+      break
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_wait_until_activated(installation_index):
+    local response = "UNDEFINE"
+    local ret = False
+    while (True):
+      response = dh_pgc_get_gripper_status(installation_index)
+      if ("" == response):
+        while (True):
+          popup("1981:exportWaitUntilActivatedFunction","Exception", blocking = True)
+        end
+      end
+      if ("UNDEFINE" == response):
+        while (True):
+          popup("1998:exportWaitUntilActivatedFunction","Exception", blocking = True)
+        end
+      end
+      if ("ACTIVATED" == response):
+        ret = True
+        break
+      end
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_wait_until_gripped(installation_index):
+    local response = "UNDEFINE"
+    local ret = False
+    while (True):
+      response = dh_pgc_get_gripper_status(installation_index)
+      if ("" == response):
+        while (True):
+          popup("2040:exportWaitUntilGrippedFunction","Exception", blocking = True)
+        end
+      end
+      if ("UNDEFINE" == response):
+        while (True):
+          popup("2057:exportWaitUntilGrippedFunction","Exception", blocking = True)
+        end
+      end
+      if ("DETECTED" == response):
+        ret = True
+        break
+      end
+    end
+    return ret
+  end
+  
+  
+  def dh_pgc_wait_until_gripped_or_arrived(installation_index):
+    local response = "UNDEFINE"
+    local ret = False
+    while (True):
+      response = dh_pgc_get_gripper_status(installation_index)
+      if ("" == response):
+        while (True):
+          popup("2100:exportWaitUntilGrippedOrArrivedFunction","Exception", blocking = True)
+        end
+      end
+      if ("UNDEFINE" == response):
+        while (True):
+          popup("2117:exportWaitUntilGrippedOrArrivedFunction","Exception", blocking = True)
+        end
+      end
+      if ("ARRIVED" == response):
+        ret = True
+        break
+      end
+      if ("DETECTED" == response):
+        ret = True
+        break
+      end
+      if ("DROPPED" == response):
+        ret = True
+        break
+      end
+    end
+    return ret
+  end
+  
+  # end: URCap Installation Node
+
+  def pgc_move(position, speed, force):
+    if (False == dh_pgc_is_connected(1)):
+      popup("PGC not connected", "Tip", blocking=True)
+    end
+
+    if (False == dh_pgc_is_activated(1)):
+      popup("PGC not activated", "Tip", blocking=True)
+    end
+
+    while (True):
+      dh_pgc_operate = dh_pgc_set_force(1, force)
+      if (True == dh_pgc_operate):
+        break
+      end
+      sleep(0.1)
+    end
+
+    while (True):
+      dh_pgc_operate = dh_pgc_set_speed(1, speed)
+      if (True == dh_pgc_operate):
+        break
+      end
+      sleep(0.1)
+    end
+
+    while (True):
+      dh_pgc_operate = dh_pgc_set_position(1, position)
+      if (True == dh_pgc_operate):
+        break
+      end
+      sleep(0.1)
+    end
+
+    dh_pgc_wait_until_gripped_or_arrived(1)
+    dh_pgc_wait_until_idle(1)
+  end
+  
+  {{PROGRAM_BODY}}
+
+end
+
+external_arm_pgc_test()
