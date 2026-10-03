@@ -63,6 +63,26 @@ on the robot's network**:
 
 ---
 
+## Quick start
+
+1. Open this folder in **Unity Hub** with Unity **2022.3.30f1**.
+2. Open `Assets/Scenes/UR7e_Unity_Scene.unity`.
+3. **Set all IP addresses** (section above) and save the scene.
+4. Start the robot / URSim, power on, release brakes, and switch to **Remote Control**.
+5. Press **Play**. The UR7e model should follow the robot's joints.
+6. Toggle **DO4** in PolyScope (**I/O** tab). The PGC-140-50 model closes when DO4 is ON and opens when it is OFF.
+
+### Two ways to drive the gripper model
+
+| Mode | Component | Needs | Notes |
+|---|---|---|---|
+| DO4 mirror | `PGCDigitalOutputSync` | Nothing extra (works in URSim) | Updates every frame. |
+| DH programs | `PGCCommandConsole` | DH PGC URCap on the robot, correct **Unity Listen IP**, firewall open | Model moves when the program reaches each `dh_pgc_set_position`. |
+
+Use one at a time. While `PGCDigitalOutputSync` is enabled it overrides the console every frame, so disable it before running DH programs.
+
+---
+
 ## Scene hierarchy and required components
 
 If a component shows **"Missing (Mono Script)"** or was removed, re-add it here.
@@ -91,8 +111,6 @@ Connects to the robot on port 30001 and rotates the six joints of the model.
 |---|---|
 | Robot IP | Your robot IP from PolyScope |
 | Transforms (size 6) | `shoulder_link`, `upper_arm_link`, `forearm_link`, `wrist_1_link`, `wrist_2_link`, `wrist_3_link` (drag them in this order from the UR7e hierarchy) |
-| Rotation Axis (size 6) | `NegativeY` for all six |
-| Rotation Offsets (size 6) | `0` for all six |
 
 It connects automatically when you press Play.
 
@@ -163,28 +181,6 @@ Hold the right mouse button to look around, **W/A/S/D** to move, **Shift** to mo
 | `Assets/URScripts/dh_pgc_template.script` | URScript template with DH PGC functions and `{{PROGRAM_BODY}}` | DH PGC URCap on the robot |
 
 Keep each file name identical to its class name, otherwise Unity cannot attach it as a component.
-
----
-
-## Quick start
-
-1. Open this folder in **Unity Hub** with Unity **2022.3.30f1**.
-2. Open `Assets/Scenes/UR7e_Unity_Scene.unity`.
-3. **Set all IP addresses** (section above) and save the scene.
-4. Start the robot / URSim, power on, release brakes, and switch to **Remote Control**.
-5. Press **Play**. The UR7e model should follow the robot's joints.
-6. Toggle **DO4** in PolyScope (**I/O** tab). The PGC-140-50 model closes when DO4 is ON and opens when it is OFF.
-
-### Two ways to drive the gripper model
-
-| Mode | Component | Needs | Notes |
-|---|---|---|---|
-| DO4 mirror | `PGCDigitalOutputSync` | Nothing extra (works in URSim) | Updates every frame. |
-| DH programs | `PGCCommandConsole` | DH PGC URCap on the robot, correct **Unity Listen IP**, firewall open | Model moves when the program reaches each `dh_pgc_set_position`. |
-
-Use one at a time. While `PGCDigitalOutputSync` is enabled it overrides the console every frame,
-so disable it before running DH programs.
-
 ---
 
 ## Troubleshooting
