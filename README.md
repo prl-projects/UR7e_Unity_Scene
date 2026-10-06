@@ -192,6 +192,34 @@ Keep each file name identical to its class name, otherwise Unity cannot attach i
 | No `[PGC Sync] Received:` lines in the Console | **Unity Listen IP** must be your PC's IP on the robot network; firewall allows TCP 5000; robot is in Remote Control; DH PGC URCap installed. |
 | Robot rejects programs | Pendant is in **Local** mode — switch to **Remote**. |
 | "Missing (Mono Script)" or "can't add script" | Fix compile errors in the Console first; file name must equal class name; re-add the component using the tables above. |
+|---|---|
+
+#### Setup UR7e in URSim
+- Situation：Can’t find UR7e URSim in VM, unlike UR3, 5, 10, 20.
+- VM version：URSim_VIRTUAL-5.12.6.1102099 or newer version (5.9.x unable to find UR7e)
+- Solution：Write a Exec manually
+    1. Open terminal at the left below corner of URSim
+    2. Create the Desktop File
+       ```
+       nano ~/Desktop/UR7-URSim.desktop
+       ``` 
+    3. Paste the config on leadpad
+       ``` 
+       [Desktop Entry]
+       Version=1.0
+       Type=Application
+       Terminal=false
+       Name=URsim UR7e
+       Exec = bash -c "cd ~/ursim-current && ./start-ursim.sh UR7e"
+       Icon=utilities-terminal
+       Categories=Applicaiton;
+       ```
+       And press Ctrl+O to write out, then Enter to leave.
+    4. (Optional) Make the file executable within Terminal
+       ``` 
+       chmod +x ~/Desktop/UR7-URSim.desktop
+       ``` 
+    5. The exec file will be able to open up UR7e
 
 ---
 
